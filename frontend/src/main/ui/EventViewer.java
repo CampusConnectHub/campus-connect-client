@@ -1,14 +1,19 @@
-package ui;
-
+package ui; //Directory
+//Packages within JSL
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-public class EventViewer extends Frame implements ActionListener {
+
+public class EventViewer extends Frame implements ActionListener
+{
     List eventList;
     Button backButton;
     Frame caller;
 
-    public EventViewer(Frame caller) {
+    public EventViewer(Frame caller)
+    {
         this.caller = caller;
 
         setTitle("CampusConnect - Event Viewer");
@@ -30,15 +35,18 @@ public class EventViewer extends Frame implements ActionListener {
 
         setVisible(true);
 
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
+        addWindowListener(new WindowAdapter()
+        {
+            public void windowClosing(WindowEvent e)
+            {
                 dispose();
                 caller.setVisible(true);
             }
         });
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e)
+    {
         dispose();
         caller.setVisible(true);
     }
