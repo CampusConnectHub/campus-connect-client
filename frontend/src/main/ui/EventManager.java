@@ -1,10 +1,14 @@
-package ui;
-
+package ui; //Directory
+//Packages within JSL
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-public class EventManager extends Frame implements ActionListener {
+
+public class EventManager extends Frame implements ActionListener
+{
     TextField titleField;
     TextArea descriptionArea;
     Button addButton, clearButton, backButton;
@@ -13,7 +17,8 @@ public class EventManager extends Frame implements ActionListener {
     Frame caller;
     String callerRole;
 
-    public EventManager(Frame caller, String role) {
+    public EventManager(Frame caller, String role)
+    {
         this.caller = caller;
         this.callerRole = role;
 
@@ -55,29 +60,38 @@ public class EventManager extends Frame implements ActionListener {
         setVisible(true);
 
         // Handle ❌ close button
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
+        addWindowListener(new WindowAdapter()
+        {
+            public void windowClosing(WindowEvent e)
+            {
                 dispose();
                 caller.setVisible(true);
             }
         });
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == addButton) {
+    public void actionPerformed(ActionEvent e)
+    {
+        if (e.getSource() == addButton)
+        {
             String title = titleField.getText().trim();
             String desc = descriptionArea.getText().trim();
-            if (!title.isEmpty()) {
+            if (!title.isEmpty())
+            {
                 String event = title + " - " + desc;
                 events.add(event);
                 eventList.add(event);
                 titleField.setText("");
                 descriptionArea.setText("");
             }
-        } else if (e.getSource() == clearButton) {
+        }
+        else if (e.getSource() == clearButton)
+        {
             titleField.setText("");
             descriptionArea.setText("");
-        } else if (e.getSource() == backButton) {
+        }
+        else if (e.getSource() == backButton)
+        {
             dispose();
             caller.setVisible(true);
         }
