@@ -78,7 +78,7 @@ public class LoginScreen extends Frame implements ActionListener
         switch (role)
         {
             case "Admin":
-                new AdminDashboard(user);
+                new AdminDashboardSwing(user);
                 break;
             case "Faculty":
                 new FacultyDashboard(user);
