@@ -8,8 +8,8 @@ Campus Connect is a role-based desktop GUI application designed to streamline ca
 
 - 🔐 **Login System** with role-based redirection (Admin, Faculty, Student)
 - 🗂️ **Modular Dashboards** for each role
-  - Admin: Manage events, post notices, view feedback
-  - Faculty: Post notices, view feedback
+  - Admin: Manage events, Post notices, View feedback
+  - Faculty: Post notices, Post Events, View/submit feedback
   - Student: View notices/events, submit feedback
 - 📢 **Notice Board** with role-based posting
 - 📅 **Event Manager & Viewer**
