@@ -5,42 +5,64 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class FacultyDashboardSwing extends JFrame implements ActionListener {
-    private JButton postNoticeButton, viewFeedbackButton, reviewAssignmentsButton, attendanceButton, teamViewerButton, logoutButton;
+    private JButton postNoticeButton, viewFeedbackButton, assignmentDashboardButton, attendanceButton;
+    private JButton projectReleaseButton, submissionButton, logoutButton;
     private String username;
 
     public FacultyDashboardSwing(String username) {
         this.username = username;
 
         setTitle("CampusConnect - Faculty Dashboard");
-        setSize(400, 400);
-        setLocation(350, 220);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = screenSize.width * 2 / 3;
+        int height = screenSize.height * 2 / 3;
+        setSize(width, height);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        postNoticeButton = new JButton("Post Notice");
-        viewFeedbackButton = new JButton("View Feedback");
-        reviewAssignmentsButton = new JButton("Review Assignments");
-        attendanceButton = new JButton("Attendance Panel");
-        teamViewerButton = new JButton("View Project Teams");
-        logoutButton = new JButton("Logout");
+        JLabel headingLabel = new JLabel("CampusConnect Faculty Panel", SwingConstants.CENTER);
+        headingLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(headingLabel, BorderLayout.NORTH);
 
-        postNoticeButton.addActionListener(this);
-        viewFeedbackButton.addActionListener(this);
-        reviewAssignmentsButton.addActionListener(this);
-        attendanceButton.addActionListener(this);
-        teamViewerButton.addActionListener(this);
-        logoutButton.addActionListener(this);
+        postNoticeButton = createButton("Post Notice", "Publish announcements to students");
+        viewFeedbackButton = createButton("View Feedback", "Review feedback from students");
+        assignmentDashboardButton = createButton("Assignment Dashboard", "Manage assignments");
+        attendanceButton = createButton("Attendance Panel", "Track student attendance");
+        projectReleaseButton = createButton("Project Release", "Manage subject project workflows");
+        submissionButton = createButton("View Submissions", "Review student submissions");
+        logoutButton = createButton("Logout", "Exit the faculty dashboard");
 
-        JPanel panel = new JPanel(new GridLayout(6, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        panel.add(postNoticeButton);
-        panel.add(viewFeedbackButton);
-        panel.add(reviewAssignmentsButton);
-        panel.add(attendanceButton);
-        panel.add(teamViewerButton);
-        panel.add(logoutButton);
+        JPanel gridPanel = new JPanel(new GridLayout(3, 3, 20, 20));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        gridPanel.add(postNoticeButton);
+        gridPanel.add(viewFeedbackButton);
+        gridPanel.add(assignmentDashboardButton);
+        gridPanel.add(attendanceButton);
+        gridPanel.add(projectReleaseButton);
+        gridPanel.add(submissionButton);
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
 
-        add(panel);
+        add(gridPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+        bottomPanel.add(logoutButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+
         setVisible(true);
+    }
+
+    private JButton createButton(String text, String tooltip) {
+        JButton button = new JButton(text);
+        button.setToolTipText(tooltip);
+        button.setPreferredSize(new Dimension(180, 60));
+        button.addActionListener(this);
+        return button;
     }
 
     @Override
@@ -49,22 +71,25 @@ public class FacultyDashboardSwing extends JFrame implements ActionListener {
 
         if (src == postNoticeButton) {
             setVisible(false);
-            new NoticeBoard(this, "Faculty");
+            new NoticeBoardSwing(this, "Faculty");
         } else if (src == viewFeedbackButton) {
             setVisible(false);
-            new FeedbackPanel(this, "Faculty", username);
-        } else if (src == reviewAssignmentsButton) {
+            new FeedbackPanelSwing(this, "Faculty", username);
+        } else if (src == assignmentDashboardButton) {
             setVisible(false);
-            new AssignmentReviewSwing(username);
+            new AssignmentDashboardSwing(username, "Faculty");
         } else if (src == attendanceButton) {
             setVisible(false);
-            new AttendancePanelSwing(username);
-        } else if (src == teamViewerButton) {
+            new AttendancePanelSwing(username, "FACULTY");
+        } else if (src == projectReleaseButton) {
             setVisible(false);
-            new ProjectTeamViewerSwing(username);
+            new ProjectReleaseSwing(username); // Opens the new release panel
+        } else if (src == submissionButton) {
+            setVisible(false);
+            new SubmissionReviewSwing(username, "Faculty");
         } else if (src == logoutButton) {
             dispose();
-            new LoginScreenSwing(); // Swing version of LoginScreen
+            new LoginScreenSwing();
         }
     }
 }

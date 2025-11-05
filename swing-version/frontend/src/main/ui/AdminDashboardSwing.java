@@ -5,42 +5,66 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class AdminDashboardSwing extends JFrame implements ActionListener {
-    private JButton eventButton, noticeButton, feedbackButton, notificationButton, logoutButton;
+    private JButton eventButton, noticeButton, feedbackButton, notificationButton, userButton;
+    private JButton assignmentButton, attendanceButton, projectConfigButton, logoutButton;
     private String username;
 
     public AdminDashboardSwing(String username) {
         this.username = username;
 
         setTitle("CampusConnect - Admin Dashboard");
-        setSize(500, 350);
-        setLocation(300, 200);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = screenSize.width * 2 / 3;
+        int height = screenSize.height * 2 / 3;
+        setSize(width, height);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        // Create buttons
-        eventButton = new JButton("Manage Events");
-        noticeButton = new JButton("Post Notices");
-        feedbackButton = new JButton("View Feedback");
-        notificationButton = new JButton("Send Notification");
-        logoutButton = new JButton("Logout");
+        JLabel headingLabel = new JLabel("CampusConnect Admin Panel", SwingConstants.CENTER);
+        headingLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(headingLabel, BorderLayout.NORTH);
 
-        // Add action listeners
-        eventButton.addActionListener(this);
-        noticeButton.addActionListener(this);
-        feedbackButton.addActionListener(this);
-        notificationButton.addActionListener(this);
-        logoutButton.addActionListener(this);
+        eventButton = createButton("Manage Events", "Create and manage campus events");
+        noticeButton = createButton("Post Notices", "Publish announcements to students");
+        feedbackButton = createButton("View Feedback", "Review feedback from users");
+        notificationButton = createButton("Send Notification", "Send alerts or updates");
+        userButton = createButton("Manage Users", "Add, edit, or remove users");
+        assignmentButton = createButton("Assignment Dashboard", "Manage assignments");
+        attendanceButton = createButton("Attendance Panel", "Track student attendance");
+        projectConfigButton = createButton("Publish Subject Projects", "Create and manage subject project configurations");
+        logoutButton = createButton("Logout", "Exit the admin dashboard");
 
-        // Layout setup
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        panel.add(eventButton);
-        panel.add(noticeButton);
-        panel.add(feedbackButton);
-        panel.add(notificationButton);
-        panel.add(logoutButton);
+        JPanel gridPanel = new JPanel(new GridLayout(3, 3, 20, 20));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        gridPanel.add(eventButton);
+        gridPanel.add(noticeButton);
+        gridPanel.add(feedbackButton);
+        gridPanel.add(notificationButton);
+        gridPanel.add(userButton);
+        gridPanel.add(assignmentButton);
+        gridPanel.add(attendanceButton);
+        gridPanel.add(projectConfigButton); // ✅ New button
+        gridPanel.add(new JLabel("")); // Empty cell
 
-        add(panel);
+        add(gridPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+        bottomPanel.add(logoutButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+
         setVisible(true);
+    }
+
+    private JButton createButton(String text, String tooltip) {
+        JButton button = new JButton(text);
+        button.setToolTipText(tooltip);
+        button.setPreferredSize(new Dimension(180, 60));
+        button.addActionListener(this);
+        return button;
     }
 
     @Override
@@ -49,19 +73,32 @@ public class AdminDashboardSwing extends JFrame implements ActionListener {
 
         if (src == eventButton) {
             setVisible(false);
-            new EventManager(this, "Admin");
+            new EventManagerSwing(this, "Admin");
         } else if (src == noticeButton) {
             setVisible(false);
-            new NoticeBoard(this, "Admin");
+            new NoticeBoardSwing(this, "Admin");
         } else if (src == feedbackButton) {
             setVisible(false);
-            new FeedbackPanel(this, "Admin", username);
+            new FeedbackPanelSwing(this, "Admin", username);
         } else if (src == notificationButton) {
             setVisible(false);
-            new NotificationPanelSwing(username);
+            new NotificationPanelSwing(username, "Admin");
+        } else if (src == userButton) {
+            setVisible(false);
+            new UserManagementDirectorySwing(username);
+            //new UserManagementSwing(username);
+        } else if (src == assignmentButton) {
+            setVisible(false);
+            new AssignmentDashboardSwing(username, "Admin");
+        } else if (src == attendanceButton) {
+            setVisible(false);
+            new AttendancePanelSwing(username, "ADMIN");
+        } else if (src == projectConfigButton) {
+            setVisible(false);
+            new ProjectConfigAdminSwing(username); // New window for Project Teams Configuration
         } else if (src == logoutButton) {
             dispose();
-            new LoginScreenSwing(); // Swing version of LoginScreen
+            new LoginScreenSwing();
         }
     }
 }

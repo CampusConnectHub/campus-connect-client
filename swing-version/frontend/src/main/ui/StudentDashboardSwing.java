@@ -4,87 +4,94 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class StudentDashboardSwing extends JFrame implements ActionListener
-{
-    private JButton viewNoticesButton, submitFeedbackButton, viewEventsButton, assignmentButton, attendanceButton, projectTeamButton, logoutButton;
+public class StudentDashboardSwing extends JFrame implements ActionListener {
+    private JButton viewNoticesButton, submitFeedbackButton, viewEventsButton, assignmentButton;
+    private JButton attendanceButton, releasedProjectsButton, submissionButton, logoutButton;
     private String username;
 
-    public StudentDashboardSwing(String username)
-    {
+    public StudentDashboardSwing(String username) {
         this.username = username;
 
         setTitle("CampusConnect - Student Dashboard");
-        setSize(400, 450);
-        setLocation(350, 220);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = screenSize.width * 2 / 3;
+        int height = screenSize.height * 2 / 3;
+        setSize(width, height);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        viewNoticesButton = new JButton("View Notices");
-        submitFeedbackButton = new JButton("Submit Feedback");
-        viewEventsButton = new JButton("View Events");
-        assignmentButton = new JButton("Assignment Submission");
-        attendanceButton = new JButton("View Attendance");
-        projectTeamButton = new JButton("Project Teams");
-        logoutButton = new JButton("Logout");
+        JLabel headingLabel = new JLabel("CampusConnect Student Panel", SwingConstants.CENTER);
+        headingLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
+        headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(headingLabel, BorderLayout.NORTH);
 
-        viewNoticesButton.addActionListener(this);
-        submitFeedbackButton.addActionListener(this);
-        viewEventsButton.addActionListener(this);
-        assignmentButton.addActionListener(this);
-        attendanceButton.addActionListener(this);
-        projectTeamButton.addActionListener(this);
-        logoutButton.addActionListener(this);
+        viewNoticesButton = createButton("View Notices", "Check latest campus announcements");
+        submitFeedbackButton = createButton("Submit Feedback", "Share your thoughts or issues");
+        viewEventsButton = createButton("View Events", "Explore upcoming campus events");
+        assignmentButton = createButton("Assignment Submission", "Submit your assignments");
+        attendanceButton = createButton("View Attendance", "Track your attendance record");
+        releasedProjectsButton = createButton("Released Subject Projects", "Access subject-based project options");
+        submissionButton = createButton("My Submissions", "Review your past submissions");
+        logoutButton = createButton("Logout", "Exit the student dashboard");
 
-        JPanel panel = new JPanel(new GridLayout(7, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        panel.add(viewNoticesButton);
-        panel.add(submitFeedbackButton);
-        panel.add(viewEventsButton);
-        panel.add(assignmentButton);
-        panel.add(attendanceButton);
-        panel.add(projectTeamButton);
-        panel.add(logoutButton);
+        JPanel gridPanel = new JPanel(new GridLayout(3, 3, 20, 20));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        gridPanel.add(viewNoticesButton);
+        gridPanel.add(submitFeedbackButton);
+        gridPanel.add(viewEventsButton);
+        gridPanel.add(assignmentButton);
+        gridPanel.add(attendanceButton);
+        gridPanel.add(releasedProjectsButton); // ✅ New button
+        gridPanel.add(submissionButton);
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
 
-        add(panel);
+        add(gridPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+        bottomPanel.add(logoutButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+
         setVisible(true);
     }
 
+    private JButton createButton(String text, String tooltip) {
+        JButton button = new JButton(text);
+        button.setToolTipText(tooltip);
+        button.setPreferredSize(new Dimension(180, 60));
+        button.addActionListener(this);
+        return button;
+    }
+
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
 
-        if (src == viewNoticesButton)
-        {
+        if (src == viewNoticesButton) {
             setVisible(false);
             new NoticeBoardSwing(this, "Student");
-        }
-        else if (src == submitFeedbackButton)
-        {
+        } else if (src == submitFeedbackButton) {
             setVisible(false);
             new FeedbackPanelSwing(this, "Student", username);
-        }
-        else if (src == viewEventsButton)
-        {
+        } else if (src == viewEventsButton) {
             setVisible(false);
             new EventViewerSwing(this);
-        }
-        else if (src == assignmentButton)
-        {
+        } else if (src == assignmentButton) {
             setVisible(false);
             new AssignmentSubmissionSwing(username);
-        }
-        else if (src == attendanceButton)
-        {
+        } else if (src == attendanceButton) {
             setVisible(false);
             new AttendanceViewerSwing(username);
-        }
-        else if (src == projectTeamButton)
-        {
+        } else if (src == releasedProjectsButton) {
             setVisible(false);
-            new ProjectTeamPanelSwing(username);
-        }
-        else if (src == logoutButton)
-        {
+            new ProjectReleaseStudentSwing(username); // Renamed class
+        } else if (src == submissionButton) {
+            setVisible(false);
+            new SubmissionViewerSwing(username);
+        } else if (src == logoutButton) {
             dispose();
             new LoginScreenSwing();
         }

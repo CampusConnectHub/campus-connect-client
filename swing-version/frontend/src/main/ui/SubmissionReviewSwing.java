@@ -9,18 +9,18 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
-public class SubmissionViewerSwing extends JFrame implements ActionListener {
-    private JButton viewSubmissionsButton, backButton;
+public class SubmissionReviewSwing extends JFrame implements ActionListener {
+    private JButton viewAllButton, backButton;
     private JTable submissionTable;
     private DefaultTableModel tableModel;
-    private String username;
+    private String username, role;
 
-    public SubmissionViewerSwing(String username) {
+    public SubmissionReviewSwing(String username, String role) {
         this.username = username;
+        this.role = role;
 
-        setTitle("CampusConnect - My Submissions");
+        setTitle("CampusConnect - Review Submissions");
 
-        // Resize and center
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width / 2;
         int height = screenSize.height / 2;
@@ -30,30 +30,32 @@ public class SubmissionViewerSwing extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        viewSubmissionsButton = new JButton("View My Submissions");
+        viewAllButton = new JButton("View All Submissions");
         backButton = new JButton("Back to Dashboard");
 
-        viewSubmissionsButton.addActionListener(this);
+        viewAllButton.addActionListener(this);
         backButton.addActionListener(this);
 
         JPanel topPanel = new JPanel();
-        topPanel.add(viewSubmissionsButton);
+        topPanel.add(viewAllButton);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 
-        tableModel = new DefaultTableModel(new String[]{"ID", "Title", "Date", "Status"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"ID", "Student", "Title", "Date", "Status"}, 0);
         submissionTable = new JTable(tableModel);
-        add(new JScrollPane(submissionTable), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(submissionTable);
+        add(scrollPane, BorderLayout.CENTER);
 
         setVisible(true);
     }
 
-    private void loadSubmissions() {
+    private void loadAllSubmissions() {
         tableModel.setRowCount(0);
-        List<Submission> list = new SubmissionDAO().getSubmissionsByStudent(username);
+        List<Submission> list = new SubmissionDAO().getAllSubmissions();
         for (Submission s : list) {
             tableModel.addRow(new Object[]{
                     s.getId(),
+                    s.getStudentName(),
                     s.getAssignmentTitle(),
                     s.getSubmissionDate(),
                     s.getStatus()
@@ -63,11 +65,17 @@ public class SubmissionViewerSwing extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == viewSubmissionsButton) {
-            loadSubmissions();
-        } else if (e.getSource() == backButton) {
+        Object src = e.getSource();
+
+        if (src == viewAllButton) {
+            loadAllSubmissions();
+        } else if (src == backButton) {
             dispose();
-            new StudentDashboardSwing(username);
+            switch (role) {
+                case "Admin": new AdminDashboardSwing(username); break;
+                case "Faculty": new FacultyDashboardSwing(username); break;
+                default: JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+            }
         }
     }
 }
