@@ -23,7 +23,7 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
         this.adminUsername = adminUsername;
 
         setTitle("CampusConnect - User Management");
-        setSize(1100, 650);
+        setSize(1200, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
@@ -40,7 +40,7 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
         classTree.addMouseListener(new TreeContextMenu());
 
         JScrollPane treeScroll = new JScrollPane(classTree);
-        treeScroll.setPreferredSize(new Dimension(280, 500));
+        treeScroll.setPreferredSize(new Dimension(300, 500));
 
         // Table Panel
         String[] columns = {"Username", "Roll No", "Name", "Phone", "Email", "Role", "Edit"};
@@ -67,6 +67,7 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
 
         JScrollPane tableScroll = new JScrollPane(userTable);
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, tableScroll);
+        splitPane.setDividerLocation(320);
         add(splitPane, BorderLayout.CENTER);
 
         // Top Buttons
@@ -75,6 +76,7 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
         addYearButton = new JButton("Add Academic Year");
         addSectionButton = new JButton("Add Section");
         refreshButton = new JButton("Refresh Tree");
+        JButton addBranchButton = new JButton("Add Branch");
 
         addUserButton.setEnabled(false);
         addYearButton.setEnabled(false);
@@ -84,12 +86,14 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
         addYearButton.addActionListener(this);
         addSectionButton.addActionListener(this);
         refreshButton.addActionListener(e -> loadTree());
+        addBranchButton.addActionListener(e -> new UserMBranchAddPopupSwing(this::loadTree));
 
+        topPanel.add(addBranchButton); // ✅ Added missing button
         topPanel.add(addUserButton);
         topPanel.add(addYearButton);
         topPanel.add(addSectionButton);
         topPanel.add(refreshButton);
-        add(topPanel, BorderLayout.SOUTH);
+        add(topPanel, BorderLayout.NORTH);
 
         // Bottom: Back Button
         backButton = new JButton("Back to Dashboard");
@@ -108,56 +112,67 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
     private void loadTree() {
         ClassStructureDAO dao = new ClassStructureDAO();
         Map<String, Map<String, Map<String, List<String>>>> treeData = dao.getClassTree();
+        System.out.println("Tree data: " + treeData);
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Branches");
-        for (String branch : treeData.keySet()) {
-            DefaultMutableTreeNode branchNode = new DefaultMutableTreeNode(branch);
-            Map<String, Map<String, List<String>>> yearsMap = treeData.get(branch);
 
-            for (String academicYear : yearsMap.keySet()) {
-                DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(academicYear);
-                Map<String, List<String>> yearSections = yearsMap.get(academicYear);
+        if (treeData.isEmpty()) {
+            root.add(new DefaultMutableTreeNode("No data available"));
+        } else {
+            for (String branch : treeData.keySet()) {
+                DefaultMutableTreeNode branchNode = new DefaultMutableTreeNode(branch);
+                Map<String, Map<String, List<String>>> yearsMap = treeData.get(branch);
 
-                for (String year : yearSections.keySet()) {
-                    DefaultMutableTreeNode classYearNode = new DefaultMutableTreeNode(year);
-                    for (String section : yearSections.get(year)) {
-                        classYearNode.add(new DefaultMutableTreeNode(section));
+                for (String academicYear : yearsMap.keySet()) {
+                    DefaultMutableTreeNode yearNode = new DefaultMutableTreeNode(academicYear);
+                    Map<String, List<String>> yearSections = yearsMap.get(academicYear);
+
+                    for (String year : yearSections.keySet()) {
+                        DefaultMutableTreeNode classYearNode = new DefaultMutableTreeNode(year);
+                        for (String section : yearSections.get(year)) {
+                            classYearNode.add(new DefaultMutableTreeNode(section));
+                        }
+                        yearNode.add(classYearNode);
                     }
-                    yearNode.add(classYearNode);
+                    branchNode.add(yearNode);
                 }
-                branchNode.add(yearNode);
+                root.add(branchNode);
             }
-            root.add(branchNode);
         }
 
         classTree.setModel(new DefaultTreeModel(root));
+        ((DefaultTreeModel) classTree.getModel()).reload();
+
         for (int i = 0; i < classTree.getRowCount(); i++) {
             classTree.expandRow(i);
         }
     }
 
+
     private void handleTreeSelection() {
         TreePath path = classTree.getSelectionPath();
-        if (path == null || path.getPathCount() < 4) {
+        if (path == null) {
             addUserButton.setEnabled(false);
-            addYearButton.setEnabled(path != null && path.getPathCount() == 2);
-            addSectionButton.setEnabled(path != null && path.getPathCount() == 3);
+            addYearButton.setEnabled(false);
+            addSectionButton.setEnabled(false);
             tableModel.setRowCount(0);
             return;
         }
 
-        addUserButton.setEnabled(path.getPathCount() == 5);
-        addYearButton.setEnabled(false);
-        addSectionButton.setEnabled(false);
+        int depth = path.getPathCount();
+        addYearButton.setEnabled(depth == 2); // Branch selected
+        addSectionButton.setEnabled(depth == 4); // Year selected (1, 2, 3, 4)
+        addUserButton.setEnabled(depth == 5); // Full path selected
 
-        if (path.getPathCount() == 5) {
+        tableModel.setRowCount(0);
+
+        if (depth == 5) {
             String branch = path.getPathComponent(1).toString();
             String academicYear = path.getPathComponent(2).toString();
             String year = path.getPathComponent(3).toString();
             String section = path.getPathComponent(4).toString();
 
             List<User> users = new UserDAO().getUsersByClass(branch, year, section, academicYear);
-            tableModel.setRowCount(0);
             for (User u : users) {
                 tableModel.addRow(new Object[]{
                         u.getUsername(), u.getRollNumber(), u.getName(),
@@ -166,6 +181,37 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
             }
         }
     }
+
+    private void handleDelete(TreePath path) {
+        int depth = path.getPathCount();
+
+        String branch = path.getPathComponent(1).toString();
+
+        if (depth == 2) {
+            // Delete branch
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete branch '" + branch + "'?");
+            if (confirm == JOptionPane.YES_OPTION) {
+                new ClassStructureDAO().deleteBranch(branch);
+                loadTree();
+            }
+        } else if (depth == 3) {
+            String academicYear = path.getPathComponent(2).toString();
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete academic year '" + academicYear + "'?");
+            if (confirm == JOptionPane.YES_OPTION) {
+                new ClassStructureDAO().deleteAcademicYear(branch, academicYear);
+                loadTree();
+            }
+        } else if (depth == 4) {
+            String academicYear = path.getPathComponent(2).toString();
+            String year = path.getPathComponent(3).toString();
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete year '" + year + "'?");
+            if (confirm == JOptionPane.YES_OPTION) {
+                new ClassStructureDAO().deleteSection(branch, academicYear, year);
+                loadTree();
+            }
+        }
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -178,31 +224,53 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
             String year = path.getPathComponent(3).toString();
             String section = path.getPathComponent(4).toString();
             new UserMAddPopupSwing(branch, academicYear, year, section);
+
         } else if (e.getSource() == addYearButton && path.getPathCount() == 2) {
             String branch = path.getPathComponent(1).toString();
-            new UserMAcademicYearAddPopupSwing(branch);
-        } else if (e.getSource() == addSectionButton && path.getPathCount() == 3) {
+            new UserMAcademicYearAddPopupSwing(branch, this::loadTree); // Refresh after adding year
+
+        } else if (e.getSource() == addSectionButton && path.getPathCount() == 4) {
             String branch = path.getPathComponent(1).toString();
             String academicYear = path.getPathComponent(2).toString();
-            new UserMSectionAddPopupSwing(branch, academicYear);
+            String year = path.getPathComponent(3).toString();
+
+            UserMSectionAddPopupSwing popup = new UserMSectionAddPopupSwing(branch, academicYear, year);
+            popup.setOnSuccessCallback(this::loadTree); //  Refresh after adding section
         }
     }
 
     private class TreeContextMenu extends MouseAdapter {
+        @Override
         public void mousePressed(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {
                 TreePath path = classTree.getPathForLocation(e.getX(), e.getY());
-                if (path != null && path.getPathCount() >= 3) {
+                if (path != null && path.getPathCount() >= 2) {
                     classTree.setSelectionPath(path);
                     JPopupMenu menu = new JPopupMenu();
 
-                    if (path.getPathCount() == 3) {
+                    if (path.getPathCount() == 2) {
+                        // Branch level
+                        JMenuItem deleteBranch = new JMenuItem("Delete Branch");
+                        deleteBranch.addActionListener(ev -> {
+                            String branch = path.getPathComponent(1).toString();
+                            int confirm = JOptionPane.showConfirmDialog(null,
+                                    "Delete branch '" + branch + "' and all its data?",
+                                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                new ClassStructureDAO().deleteBranch(branch);
+                                loadTree();
+                            }
+                        });
+                        menu.add(deleteBranch);
+
+                    } else if (path.getPathCount() == 3) {
+                        // Academic year level
                         JMenuItem deleteYear = new JMenuItem("Delete Academic Year");
                         deleteYear.addActionListener(ev -> {
                             String branch = path.getPathComponent(1).toString();
                             String academicYear = path.getPathComponent(2).toString();
                             int confirm = JOptionPane.showConfirmDialog(null,
-                                    "Delete academic year " + academicYear + " under " + branch + "?",
+                                    "Delete academic year '" + academicYear + "' under '" + branch + "'?",
                                     "Confirm Delete", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
                                 new ClassStructureDAO().deleteAcademicYear(branch, academicYear);
@@ -210,14 +278,16 @@ public class UserManagementDirectorySwing extends JFrame implements ActionListen
                             }
                         });
                         menu.add(deleteYear);
+
                     } else if (path.getPathCount() == 4) {
-                        JMenuItem deleteSection = new JMenuItem("Delete Section");
+                        // Year level
+                        JMenuItem deleteSection = new JMenuItem("Delete Year (All Sections)");
                         deleteSection.addActionListener(ev -> {
                             String branch = path.getPathComponent(1).toString();
                             String academicYear = path.getPathComponent(2).toString();
                             String year = path.getPathComponent(3).toString();
                             int confirm = JOptionPane.showConfirmDialog(null,
-                                    "Delete year " + year + " under " + academicYear + " (" + branch + ")?",
+                                    "Delete all sections under year '" + year + "' in '" + academicYear + "' (" + branch + ")?",
                                     "Confirm Delete", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
                                 new ClassStructureDAO().deleteSection(branch, academicYear, year);

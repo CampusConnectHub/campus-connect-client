@@ -10,9 +10,11 @@ public class UserMAcademicYearAddPopupSwing extends JFrame implements ActionList
     private JTextField yearField;
     private JButton saveButton, cancelButton;
     private String branch;
+    private Runnable onSuccessCallback;
 
-    public UserMAcademicYearAddPopupSwing(String branch) {
+    public UserMAcademicYearAddPopupSwing(String branch, Runnable onSuccessCallback) {
         this.branch = branch;
+        this.onSuccessCallback = onSuccessCallback;
 
         setTitle("Add Academic Year to " + branch);
         setSize(350, 180);
@@ -27,7 +29,7 @@ public class UserMAcademicYearAddPopupSwing extends JFrame implements ActionList
         saveButton.addActionListener(this);
         cancelButton.addActionListener(e -> dispose());
 
-        add(new JLabel("Enter Academic Year (e.g., 2024-25):", SwingConstants.CENTER));
+        add(new JLabel("Enter Academic Year (e.g., 2024-28):", SwingConstants.CENTER));
         add(yearField);
 
         JPanel buttonPanel = new JPanel();
@@ -46,8 +48,15 @@ public class UserMAcademicYearAddPopupSwing extends JFrame implements ActionList
             return;
         }
 
-        boolean success = new ClassStructureDAO().addAcademicYear(branch, academicYear);
-        JOptionPane.showMessageDialog(this, success ? "Academic year added!" : "Failed to add year.");
-        if (success) dispose();
+        boolean success = new ClassStructureDAO().addAcademicYearWithYears(branch, academicYear);
+        JOptionPane.showMessageDialog(this,
+                success ? "Academic year added with 4 years!" : "Failed to add academic year.");
+
+        if (success) {
+            dispose();
+            if (onSuccessCallback != null) {
+                SwingUtilities.invokeLater(onSuccessCallback);
+            }
+        }
     }
 }
