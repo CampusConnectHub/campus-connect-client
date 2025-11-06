@@ -1,3 +1,4 @@
+//MAIN STARTING
 import javax.swing.SwingUtilities;
 import ui.LoginScreenSwing; // Swing version of LoginScreen
 
