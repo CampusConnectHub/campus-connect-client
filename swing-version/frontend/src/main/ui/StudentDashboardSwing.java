@@ -6,7 +6,7 @@ import java.awt.event.*;
 
 public class StudentDashboardSwing extends JFrame implements ActionListener {
     private JButton viewNoticesButton, submitFeedbackButton, viewEventsButton, assignmentButton;
-    private JButton attendanceButton, releasedProjectsButton, submissionButton, logoutButton;
+    private JButton attendanceButton, releasedProjectsButton, submissionButton, notificationButton, logoutButton;
     private String username;
 
     public StudentDashboardSwing(String username) {
@@ -27,6 +27,7 @@ public class StudentDashboardSwing extends JFrame implements ActionListener {
         headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(headingLabel, BorderLayout.NORTH);
 
+        // Dashboard buttons
         viewNoticesButton = createButton("View Notices", "Check latest campus announcements");
         submitFeedbackButton = createButton("Submit Feedback", "Share your thoughts or issues");
         viewEventsButton = createButton("View Events", "Explore upcoming campus events");
@@ -34,8 +35,10 @@ public class StudentDashboardSwing extends JFrame implements ActionListener {
         attendanceButton = createButton("View Attendance", "Track your attendance record");
         releasedProjectsButton = createButton("Released Subject Projects", "Access subject-based project options");
         submissionButton = createButton("My Submissions", "Review your past submissions");
+        notificationButton = createButton("View Notifications", "Browse published notifications");
         logoutButton = createButton("Logout", "Exit the student dashboard");
 
+        // Grid layout
         JPanel gridPanel = new JPanel(new GridLayout(3, 3, 20, 20));
         gridPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
         gridPanel.add(viewNoticesButton);
@@ -43,13 +46,14 @@ public class StudentDashboardSwing extends JFrame implements ActionListener {
         gridPanel.add(viewEventsButton);
         gridPanel.add(assignmentButton);
         gridPanel.add(attendanceButton);
-        gridPanel.add(releasedProjectsButton); // ✅ New button
+        gridPanel.add(releasedProjectsButton);
         gridPanel.add(submissionButton);
-        gridPanel.add(new JLabel(""));
+        gridPanel.add(notificationButton); // Notifications button
         gridPanel.add(new JLabel(""));
 
         add(gridPanel, BorderLayout.CENTER);
 
+        // Bottom panel
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
         bottomPanel.add(logoutButton);
@@ -87,10 +91,14 @@ public class StudentDashboardSwing extends JFrame implements ActionListener {
             new AttendanceViewerSwing(username);
         } else if (src == releasedProjectsButton) {
             setVisible(false);
-            new ProjectReleaseStudentSwing(username); // Renamed class
+            new ProjectReleaseStudentSwing(username);
         } else if (src == submissionButton) {
             setVisible(false);
             new SubmissionViewerSwing(username);
+        } else if (src == notificationButton) {
+            // Pass dashboard reference so it reopens when viewer closes
+            new NotificationViewerSwing(username, "Student", this);
+            setVisible(false);
         } else if (src == logoutButton) {
             dispose();
             new LoginScreenSwing();
