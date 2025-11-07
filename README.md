@@ -4,6 +4,12 @@ Campus Connect is a role-based desktop GUI application designed to streamline ca
 
 ---
 
+## 📦 Setup Guide
+
+To get started with the CampusConnect Client, check out the [SETUP.md](./.github/SETUP.md) for full installation and configuration instructions.
+
+---
+
 ## 🚀 Features
 
 - 🔐 **Login System** with role-based redirection (Admin, Faculty, Student)
