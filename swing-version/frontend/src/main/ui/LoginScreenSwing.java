@@ -1,5 +1,8 @@
 package ui;
 
+import dao.UserDAO;
+import model.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,7 +17,6 @@ public class LoginScreenSwing extends JFrame implements ActionListener {
     public LoginScreenSwing() {
         setTitle("CampusConnect - Login");
 
-        // Resize and center
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = screenSize.width / 2;
         int height = screenSize.height / 2;
@@ -78,18 +80,26 @@ public class LoginScreenSwing extends JFrame implements ActionListener {
                 return;
             }
 
-            dispose();
-            switch (role) {
-                case "Admin":
-                    new AdminDashboardSwing(user);
-                    break;
-                case "Faculty":
-                    new FacultyDashboardSwing(user);
-                    break;
-                case "Student":
-                    new StudentDashboardSwing(user);
-                    break;
+            UserDAO dao = new UserDAO();
+            User userObj = dao.getUserByUsernameAndPassword(user, pass);
+
+            if (userObj != null && role.equalsIgnoreCase(userObj.getRole())) {
+                dispose();
+                switch (role) {
+                    case "Admin":
+                        new AdminDashboardSwing(userObj.getUsername());
+                        break;
+                    case "Faculty":
+                        new FacultyDashboardSwing(userObj.getUsername());
+                        break;
+                    case "Student":
+                        new StudentDashboardSwing(userObj.getUsername());
+                        break;
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid credentials or role mismatch.", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
+
         } else if (src == signUpButton) {
             dispose();
             new SignUpScreenSwing();

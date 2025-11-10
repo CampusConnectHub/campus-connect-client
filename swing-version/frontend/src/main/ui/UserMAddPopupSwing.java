@@ -69,10 +69,24 @@ public class UserMAddPopupSwing extends JFrame implements ActionListener {
         String email = emailField.getText().trim();
         String role = roleBox.getSelectedItem().toString();
 
-        if (username.isEmpty() || name.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username and Name are required.");
+        // Basic validation
+        if (username.isEmpty() || name.isEmpty() || email.isEmpty() || branch == null || year == null || section == null || academicYear == null) {
+            JOptionPane.showMessageDialog(this, "Please fill all required fields.");
             return;
         }
+
+        // Debug print
+        System.out.println("Attempting to add user:");
+        System.out.println("Username: " + username);
+        System.out.println("Name: " + name);
+        System.out.println("Roll No: " + roll);
+        System.out.println("Phone: " + phone);
+        System.out.println("Email: " + email);
+        System.out.println("Role: " + role);
+        System.out.println("Branch: " + branch);
+        System.out.println("Year: " + year);
+        System.out.println("Section: " + section);
+        System.out.println("Academic Year: " + academicYear);
 
         User user = new User(0, username, role, name);
         user.setRollNumber(roll);
@@ -84,7 +98,12 @@ public class UserMAddPopupSwing extends JFrame implements ActionListener {
         user.setAcademicYear(academicYear);
 
         boolean success = new UserDAO().addFullUser(user);
-        JOptionPane.showMessageDialog(this, success ? "User added!" : "Failed to add user.");
-        if (success) dispose();
+
+        if (success) {
+            JOptionPane.showMessageDialog(this, "User added successfully!");
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "❌ Failed to add user. Check console for details.");
+        }
     }
 }

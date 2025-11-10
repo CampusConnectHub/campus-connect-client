@@ -10,8 +10,7 @@ import java.util.List;
 public class UserDAO {
 
     public boolean addFullUser(User user) {
-        String query = "INSERT INTO users (username, role, name, roll_number, phone, email, branch, year, section, academic_year) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (username, role, name, roll_number, phone, email, branch, year, section, academic_year, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -27,9 +26,12 @@ public class UserDAO {
             ps.setString(9, user.getSection());
             ps.setString(10, user.getAcademicYear());
 
-            return ps.executeUpdate() > 0;
+            // Set default password or generate one
+            ps.setString(11, "default123"); // You can hash this later
 
-        } catch (SQLException e) {
+            return ps.executeUpdate() > 0;
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -101,6 +103,24 @@ public class UserDAO {
             return false;
         }
     }
+
+    public boolean updatePasswordById(int id, String newPassword) {
+        String query = "UPDATE users SET password = ? WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, newPassword);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
     public boolean isEmailRegistered(String email) {
         String query = "SELECT id FROM users WHERE email = ?";
 
@@ -138,6 +158,67 @@ public class UserDAO {
         return null;
     }
 
+    public User getUserByUsernameAndPassword(String username, String password) {
+        String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("role")
+                );
+                user.setName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRollNumber(rs.getString("roll_number"));
+                user.setBranch(rs.getString("branch"));
+                user.setYear(rs.getString("year"));
+                user.setSection(rs.getString("section"));
+                user.setAcademicYear(rs.getString("academic_year"));
+                return user;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<User> getUsersByRole(String role) {
+        List<User> list = new ArrayList<>();
+        String query = "SELECT * FROM users WHERE role = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, role);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User user = new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("role")
+                );
+                user.setName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                list.add(user);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 
     public List<User> getUsersByClass(String branch, String year, String section, String academicYear) {
         List<User> list = new ArrayList<>();

@@ -7,6 +7,7 @@ import java.awt.event.*;
 public class AdminDashboardSwing extends JFrame implements ActionListener {
     private JButton eventButton, noticeButton, feedbackButton, notificationButton, userButton;
     private JButton assignmentButton, attendanceButton, projectConfigButton, logoutButton;
+    private JButton adminManageButton; // NEW button for Admin Management
     private String username;
 
     public AdminDashboardSwing(String username) {
@@ -36,6 +37,7 @@ public class AdminDashboardSwing extends JFrame implements ActionListener {
         assignmentButton = createButton("Assignment Dashboard", "Manage assignments");
         attendanceButton = createButton("Attendance Panel", "Track student attendance");
         projectConfigButton = createButton("Publish Subject Projects", "Create and manage subject project configurations");
+        adminManageButton = createButton("Manage Admins", "Add, edit, or delete Admin accounts"); // NEW
         logoutButton = createButton("Logout", "Exit the admin dashboard");
 
         // Grid layout
@@ -49,7 +51,7 @@ public class AdminDashboardSwing extends JFrame implements ActionListener {
         gridPanel.add(assignmentButton);
         gridPanel.add(attendanceButton);
         gridPanel.add(projectConfigButton);
-        gridPanel.add(new JLabel("")); // filler cell
+        gridPanel.add(adminManageButton); // NEW button added here
 
         add(gridPanel, BorderLayout.CENTER);
 
@@ -84,7 +86,6 @@ public class AdminDashboardSwing extends JFrame implements ActionListener {
             setVisible(false);
             new FeedbackPanelSwing(this, "Admin", username);
         } else if (src == notificationButton) {
-            // ✅ Open Notification Panel (hub)
             setVisible(false);
             new NotificationPanelSwing(username, "Admin");
         } else if (src == userButton) {
@@ -99,6 +100,9 @@ public class AdminDashboardSwing extends JFrame implements ActionListener {
         } else if (src == projectConfigButton) {
             setVisible(false);
             new ProjectConfigAdminSwing(username);
+        } else if (src == adminManageButton) { // NEW action
+            setVisible(false);
+            new AccessAdminManagementSwing(this);
         } else if (src == logoutButton) {
             dispose();
             new LoginScreenSwing();
