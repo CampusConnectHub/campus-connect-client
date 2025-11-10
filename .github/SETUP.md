@@ -62,16 +62,24 @@ USE campusconnect;
 Run the following queries to create the required tables:
 
 ```sql
-CREATE TABLE users (
-    username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(100),
-    role ENUM('Admin', 'Faculty', 'Student'),
-    name VARCHAR(100),
-    email VARCHAR(100),
-    branch VARCHAR(50),
-    year INT,
-    section VARCHAR(10)
-);
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `roll_number` varchar(50) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `branch` varchar(100) DEFAULT NULL,
+  `year` varchar(20) DEFAULT NULL,
+  `section` varchar(10) DEFAULT NULL,
+  `academic_year` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  CONSTRAINT `chk_role` CHECK ((`role` in (_utf8mb4'ADMIN',_utf8mb4'FACULTY',_utf8mb4'STUDENT')))
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
